@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const { Product, Category, Tag, ProductTag } = require('../../models');
+const { sequelize } = require('../../models/Product');
 
 // The `/api/products` endpoint
 
@@ -13,6 +14,7 @@ router.get('/', (req, res) => {
       'product_name',
       'price',
       'stock'
+      // [sequelize.literal("(SELECT GROUP_CONCAT(tag_name SEPARATOR ', ') FROM tag WHERE tag.id IN (SELECT tag_id FROM product_tag WHERE product_id = product.id))"), 'tags']
     ],
     // order: [['created_at', 'DESC']],
     include: [
@@ -22,7 +24,12 @@ router.get('/', (req, res) => {
       },
       {
         model: Tag,
-        attributes: ['id', 'tag_name']
+        attributes: ['id', 'tag_name'],
+        through: {
+          model: ProductTag,
+          attributes: []
+        },
+        as: 'product_tags'
       }
     ]
   })
@@ -54,7 +61,12 @@ router.get('/:id', (req, res) => {
       },
       {
         model: Tag,
-        attributes: ['id', 'tag_name']
+        attributes: ['id', 'tag_name'],
+        through: {
+          model: ProductTag,
+          attributes: []
+        },
+        as: 'product_tags'
       }
     ]
   })
